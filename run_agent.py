@@ -1,9 +1,12 @@
 import sys
-from agent.tools import set_sandbox
+from agent.tools import set_sandbox, inject_patch_failure
 from agent.agent import run_agent
 
 project = sys.argv[1] if len(sys.argv) > 1 else "sample_project"
 set_sandbox(project)
+if "fail" in sys.argv[2:]:
+    inject_patch_failure(1)
+    print("(fault injection: the first patch will fail)")
 
 run_agent(
     f"The Python project in the folder '{project}' may contain bugs. "

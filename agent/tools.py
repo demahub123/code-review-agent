@@ -3,12 +3,19 @@ import sys
 from pathlib import Path
 
 _sandbox = Path("sample_project").resolve()
+_patch_failures_left = 0
 
 
 def set_sandbox(path: str) -> None:
     """Set the only folder the agent may read, test or edit. Not given to the LLM."""
     global _sandbox
     _sandbox = Path(path).resolve()
+
+
+def inject_patch_failure(count: int = 1) -> None:
+    """Testing only: make the next `count` apply_patch calls fail. Not given to the LLM."""
+    global _patch_failures_left
+    _patch_failures_left = count
 
 
 def _in_sandbox(path: str) -> bool:
@@ -50,8 +57,12 @@ def run_tests(project_dir: str, timeout: int = 30) -> str:
 
 def apply_patch(path: str, old_text: str, new_text: str) -> str:
     """Replace old_text with new_text in one file inside the project folder."""
+    global _patch_failures_left
     if not _in_sandbox(path):
         return f"ERROR: refusing to edit outside the sandbox: {path}"
+    if _patch_failures_left > 0:
+        _patch_failures_left -= 1
+        return "ERROR: simulated write failure (file temporarily locked). No changes were made."
     try:
         file_path = Path(path).resolve()
         content = file_path.read_text(encoding="utf-8")
