@@ -1,0 +1,13 @@
+condition,project,run,success,steps,patches,tool_errors,seconds,llm_error,attempts
+baseline,sample_project,1,True,6,1,0,26.1,False,1
+memory,sample_project,1,True,8,1,0,41.7,False,1
+fault,sample_project,1,True,7,1,1,31.1,False,1
+baseline,sample_project2,1,True,8,4,0,36.6,False,1
+memory,sample_project2,1,True,7,1,0,36.3,False,1
+fault,sample_project2,1,True,11,4,2,52.0,False,1
+baseline,sample_project3,1,True,8,4,0,36.5,False,1
+memory,sample_project3,1,True,7,1,0,36.3,False,1
+fault,sample_project3,1,True,7,1,1,32.0,False,1
+baseline,sample_project4,1,True,14,7,0,67.1,False,1
+memory,sample_project4,1,True,7,1,0,36.5,False,1
+fault,sample_project4,1,True,7,1,1,31.8,False,1

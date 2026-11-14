@@ -1,0 +1,80 @@
+
+--- Step 1 ---
+ACT: run_tests({'project_dir': 'sample_project2'})
+RESULT: FFFF                                                                     [100%]
+================================== FAILURES ===================================
+________________________________ test_is_even _________________________________
+test_utils.py:5: in test_is_even
+    assert is_even(4) is Tr
+
+--- Step 2 ---
+ACT: search_memory({'query': 'IndexError list index out of range is_even count_words'})
+RESULT: - Lesson from sample_project4 (fixed): symptom: round_half_up(2.5) returns 2 instead of 3 | cause: built-in round function uses banker's rounding rather than half-up rounding | fix: use decimal module with ROUND_HALF_UP rounding mode
+- Lesson from sample_project4 (fixed): symptom: pagination returns
+
+--- Step 3 ---
+ACT: read_file({'path': 'sample_project2/utils.py'})
+RESULT: def is_even(n):
+    return n % 2 == 1
+
+
+def last_item(items):
+    return items[len(items)]
+
+
+def max_of(numbers):
+    best = numbers[0]
+    for n in numbers:
+        if n > best:
+            best = n
+    return best
+
+
+def count_words(text):
+    return len(text.split(" "))
+
+--- Step 4 ---
+ACT: read_file({'path': 'sample_project2/test_utils.py'})
+RESULT: from utils import is_even, last_item, max_of, count_words
+
+
+def test_is_even():
+    assert is_even(4) is True
+    assert is_even(7) is False
+
+
+def test_last_item():
+    assert last_item([1, 2, 3]) == 3
+
+
+def test_max_of():
+    assert max_of([3, 9, 2]) == 9
+    assert max_of([]) is None
+
+
+def test_co
+
+--- Step 5 ---
+ACT: apply_patch({'old_text': 'def is_even(n):\n    return n % 2 == 1\n\n\ndef last_item(items):\n    return items[len(items)]\n\n\ndef max_of(numbers):\n    best = numbers[0]\n    for n in numbers:\n        if n > best:\n            best = n\n    return best\n\n\ndef count_words(text):\n    return len(text.split(" "))', 'new_text': 'def is_even(n):\n    return n % 2 == 0\n\n\ndef last_item(items):\n    if not items:\n        return None\n    return items[-1]\n\n\ndef max_of(numbers):\n    if not numbers:\n        return None\n    best = numbers[0]\n    for n in numbers:\n        if n > best:\n            best = n\n    return best\n\n\ndef count_words(text):\n    if not text.strip():\n        return 0\n    return len(text.split())', 'path': 'sample_project2/utils.py'})
+RESULT: OK: patched sample_project2/utils.py
+
+--- Step 6 ---
+ACT: run_tests({'project_dir': 'sample_project2'})
+RESULT: ....                                                                     [100%]
+4 passed in 0.04s
+
+
+--- Step 7 ---
+AGENT REPORT: I have successfully fixed all the bugs in `sample_project2`:
+
+1. **`is_even`**: Fixed the modulo condition from `n % 2 == 1` (which checked for odd numbers) to `n % 2 == 0`.
+2. **`last_item`**: Fixed `IndexError` by checking if `items` is empty (returning `None`) and using negative indexing `items[-1]` instead of `items[len(items)]`.
+3. **`max_of`**: Fixed `IndexError` by checking if `numbers` is empty and returning `None`.
+4. **`count_words`**: Fixed empty string and spacing issues by using `text.split()` without arguments (which handles arbitrary whitespace separation correctly) and returning `0` if `text` is empty or only whitespace.
+
+All tests now pass successfully.
+
+Saved to memory: success=True, steps=7, patches=1
+LESSON: symptom: parity check returns incorrect boolean value for even numbers | cause: modulo operation compared remainder against odd instead of even | fix: update modulo comparison to check for a remainder of zero
+LESSON: symptom: index error raised when accessing last element of a sequence | cause: indexing sequence using its length instead of maximum valid index or negative offset | fix: use negative indexing or check sequence bounds before access
+LESSON: symptom: function fails or raises error on empty collection inputs | cause: missing validation for empty inputs before processing elements | fix: add conditional checks to handle empty inputs safely and return appropriate default values

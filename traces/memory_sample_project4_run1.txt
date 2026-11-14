@@ -1,0 +1,83 @@
+
+--- Step 1 ---
+ACT: run_tests({'project_dir': 'sample_project4'})
+RESULT: FFFF                                                                     [100%]
+================================== FAILURES ===================================
+_____________________________ test_round_half_up ______________________________
+test_helpers.py:6: in test_round_half_up
+    assert round_ha
+
+--- Step 2 ---
+ACT: search_memory({'query': 'round half up float rounding paginate offset dedupe ordering parse bool falsy'})
+RESULT: - Lesson from sample_project3 (fixed): symptom: monetary conversion yields off-by-one results due to float multiplication truncation | cause: direct casting of floating-point arithmetic to integers loses precision | fix: round the product before converting to integer
+- Lesson from sample_project3 (f
+
+--- Step 3 ---
+ACT: read_file({'path': 'sample_project4/helpers.py'})
+RESULT: def round_half_up(x):
+    return round(x)
+
+
+def paginate(items, page, size):
+    start = page * size
+    return items[start:start + size]
+
+
+def parse_bool(text):
+    return bool(text)
+
+
+def dedupe(items):
+    return list(set(items))
+
+--- Step 4 ---
+ACT: read_file({'path': 'sample_project4/test_helpers.py'})
+RESULT: import pytest
+from helpers import round_half_up, paginate, parse_bool, dedupe
+
+
+def test_round_half_up():
+    assert round_half_up(2.5) == 3
+    assert round_half_up(-2.5) == -3
+    assert round_half_up(2.4) == 2
+    assert round_half_up(0.5) == 1
+
+
+def test_paginate():
+    items = [1, 2, 3, 4, 5]
+ 
+
+--- Step 5 ---
+ACT: apply_patch({'old_text': 'def round_half_up(x):\n    return round(x)\n\n\ndef paginate(items, page, size):\n    start = page * size\n    return items[start:start + size]\n\n\ndef parse_bool(text):\n    return bool(text)\n\n\ndef dedupe(items):\n    return list(set(items))', 'path': 'sample_project4/helpers.py', 'new_text': 'import math\nfrom decimal import Decimal, ROUND_HALF_UP\n\n\ndef round_half_up(x):\n    # Using Decimal with ROUND_HALF_UP to correctly implement round half up\n    # Python\'s built-in round() uses round-to-even (banker\'s rounding).\n    d = Decimal(str(x))\n    return int(d.quantize(Decimal(\'1\'), rounding=ROUND_HALF_UP))\n\n\ndef paginate(items, page, size):\n    if page < 1:\n        raise ValueError("Page must be >= 1")\n    start = (page - 1) * size\n    return items[start:start + size]\n\n\ndef parse_bool(text):\n    if not isinstance(text, str):\n        raise ValueError("Must be a string")\n    cleaned = text.strip().lower()\n    if cleaned in ("true", "yes", "1"):\n        return True\n    if cleaned in ("false", "no", "0"):\n        return False\n    raise ValueError(f"Cannot parse boolean from {text}")\n\n\ndef dedupe(items):\n    seen = set()\n    result = []\n    for item in items:\n        if item not in seen:\n            seen.add(item)\n            result.append(item)\n    return result'})
+RESULT: OK: patched sample_project4/helpers.py
+
+--- Step 6 ---
+ACT: run_tests({'project_dir': 'sample_project4'})
+RESULT: ....                                                                     [100%]
+4 passed in 0.04s
+
+
+--- Step 7 ---
+AGENT REPORT: I have successfully found and fixed all the bugs in `sample_project4`.
+
+### Summary of Bugs and Fixes:
+1. **`round_half_up`**:
+   - **Bug**: Used Python's built-in `round()`, which performs round-to-even (banker's rounding) rather than round-half-up (e.g., `round(2.5)` returns `2` instead of `3`).
+   - **Fix**: Used `decimal.Decimal` with `ROUND_HALF_UP` rounding mode to correctly implement half-up rounding.
+
+2. **`paginate`**:
+   - **Bug**: Calculated `start = page * size` without adjusting for 1-based page numbering or validating that `page >= 1` (raising ValueError when `page == 0`).
+   - **Fix**: Added validation for `page < 1` raising a `ValueError`, and computed `start = (page - 1) * size`.
+
+3. **`parse_bool`**:
+   - **Bug**: Simply returned `bool(text)`, which evaluated any non-empty string (including `"0"`, `"false"`, `"no"`) to `True`.
+   - **Fix**: Trimmed and lowercased the input string, checking against truthy values (`"true"`, `"yes"`, `"1"`), falsy values (`"false"`, `"no"`, `"0"`), and raising a `ValueError` for invalid strings like `"maybe"`.
+
+4. **`dedupe`**:
+   - **Bug**: Used `list(set(items))`, which lost the original ordering of items.
+   - **Fix**: Reimplemented deduplication using a seen set while iterating through `items` to preserve the original insertion order.
+
+Saved to memory: success=True, steps=7, patches=1
+LESSON: symptom: round half up rounding behavior fails on half values | cause: using standard language rounding which defaults to round-to-even | fix: use decimal arithmetic with explicit round-half-up mode
+LESSON: symptom: pagination returns incorrect slice of items | cause: missing offset adjustment for one-based page numbering | fix: adjust start index calculation using page minus one times size and validate page number
+LESSON: symptom: string truthiness evaluation treats negative text representations as true | cause: casting non-empty string directly to boolean | fix: match normalized input against explicit truthy and falsy string sets and raise on invalid input
