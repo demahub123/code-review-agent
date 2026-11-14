@@ -3,6 +3,7 @@ import re
 from pathlib import Path
 
 MEMORY_FILE = Path("memory.json")
+EXCLUDE_PROJECT = None  # used by the evaluation to hide a project's own lessons
 
 STOPWORDS = {
     "the", "and", "for", "with", "that", "this", "from", "when", "not",
@@ -34,7 +35,11 @@ def _searchable(ep: dict) -> str:
 
 def recall(query: str, limit: int = 3) -> list:
     q = _words(query)
-    scored = [(len(q & _words(_searchable(ep))), ep) for ep in load()]
+    scored = [
+        (len(q & _words(_searchable(ep))), ep)
+        for ep in load()
+        if ep.get("project") != EXCLUDE_PROJECT
+    ]
     scored.sort(key=lambda pair: pair[0], reverse=True)
     return [ep for score, ep in scored[:limit] if score > 0]
 
