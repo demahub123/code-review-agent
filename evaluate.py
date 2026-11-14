@@ -15,8 +15,8 @@ RESULTS = Path("results.csv")
 EVAL_MEMORY = Path("eval_memory.json")
 TRACES = Path("traces")
 FIELDS = ["condition", "project", "run", "success", "steps", "patches",
-          "tool_errors", "seconds", "llm_error"]
-PAUSE = 5  # seconds between runs, to be gentle on the free tier
+          "tool_errors", "seconds", "llm_error", "attempts"]
+PAUSE = 5  # seconds between runs
 
 
 def reset_bugs():
@@ -48,6 +48,17 @@ def run_one(condition, project, use_memory, inject_fault):
     return result, buffer.getvalue(), seconds
 
 
+def run_with_retry(condition, project, use_memory, inject_fault, max_attempts=3):
+    """Retry when the LLM is unavailable, so outages don't count as agent failures."""
+    for attempt in range(1, max_attempts + 1):
+        result, trace, seconds = run_one(condition, project, use_memory, inject_fault)
+        if not result["llm_error"]:
+            break
+        print(f"  (LLM unavailable, attempt {attempt}/{max_attempts}; waiting 65s)")
+        time.sleep(65)
+    return result, trace, seconds, attempt
+
+
 def already_done():
     if not RESULTS.exists():
         return set()
@@ -63,7 +74,7 @@ def main():
     if "memory" in CONDITIONS and not EVAL_MEMORY.exists():
         print("Seeding memory with one run per project (not recorded)...")
         for project in PROJECTS:
-            result, _, _ = run_one("seed", project, use_memory=True, inject_fault=False)
+            result, _, _, _ = run_with_retry("seed", project, True, False)
             print(f"  seed {project}: success={result['success']}")
             time.sleep(PAUSE)
 
@@ -78,7 +89,7 @@ def main():
                 for condition in CONDITIONS:
                     if (condition, project, run) in done:
                         continue
-                    result, trace, seconds = run_one(
+                    result, trace, seconds, attempts = run_with_retry(
                         condition, project,
                         use_memory=(condition == "memory"),
                         inject_fault=(condition == "fault"),
@@ -91,12 +102,13 @@ def main():
                         "patches": result["patches"],
                         "tool_errors": result["tool_errors"],
                         "seconds": seconds, "llm_error": result["llm_error"],
+                        "attempts": attempts,
                     })
                     f.flush()
                     print(f"{condition:9} {project:16} run {run}: "
                           f"success={result['success']} steps={result['steps']} "
                           f"patches={result['patches']} errors={result['tool_errors']} "
-                          f"{seconds}s")
+                          f"llm_error={result['llm_error']} attempts={attempts} {seconds}s")
                     time.sleep(PAUSE)
     print("\nDone. Results saved to results.csv, traces saved in the traces folder.")
 

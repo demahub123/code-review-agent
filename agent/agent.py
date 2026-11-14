@@ -9,6 +9,7 @@ load_dotenv()
 MODEL = "gemini-3.5-flash-lite"
 MAX_STEPS = 20
 USE_MEMORY = True
+MIN_GAP = 5.0  # seconds between LLM calls: the free tier allows 15 per minute
 
 BASE_TOOLS = {
     "read_file": tools.read_file,
@@ -17,6 +18,7 @@ BASE_TOOLS = {
 }
 
 client = genai.Client(http_options=types.HttpOptions(timeout=60000))
+_last_call = 0.0
 
 
 def build_prompt(use_memory):
@@ -43,16 +45,21 @@ def build_prompt(use_memory):
     )
 
 
-def call_llm(contents, config, retries=2):
-    """Call the LLM, retrying if the server fails (we saw 504 errors earlier)."""
+def call_llm(contents, config, retries=4):
+    """Call the LLM, staying under the free-tier rate limit and waiting out 429 errors."""
+    global _last_call
     for attempt in range(retries + 1):
+        wait = MIN_GAP - (time.time() - _last_call)
+        if wait > 0:
+            time.sleep(wait)
+        _last_call = time.time()
         try:
             return client.models.generate_content(
                 model=MODEL, contents=contents, config=config
             )
         except Exception as e:
-            print(f"  LLM error (attempt {attempt + 1}): {e}")
-            time.sleep(5)
+            print(f"  LLM error (attempt {attempt + 1}): {str(e)[:200]}")
+            time.sleep(65 if "429" in str(e) else 5)
     return None
 
 
