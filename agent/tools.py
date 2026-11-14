@@ -28,3 +28,21 @@ def run_tests(project_dir: str, timeout: int = 30) -> str:
         return f"ERROR: tests timed out after {timeout} seconds"
     except Exception as e:
         return f"ERROR: {e}"
+
+def apply_patch(path: str, old_text: str, new_text: str, sandbox: str = "sample_project") -> str:
+    """Replace old_text with new_text in one file. Only works inside the sandbox folder."""
+    try:
+        file_path = Path(path).resolve()
+        sandbox_path = Path(sandbox).resolve()
+        if sandbox_path not in file_path.parents:
+            return f"ERROR: refusing to edit outside the sandbox: {path}"
+        content = file_path.read_text(encoding="utf-8")
+        count = content.count(old_text)
+        if count == 0:
+            return "ERROR: old_text not found, no changes made"
+        if count > 1:
+            return f"ERROR: old_text appears {count} times, be more specific"
+        file_path.write_text(content.replace(old_text, new_text), encoding="utf-8")
+        return f"OK: patched {path}"
+    except Exception as e:
+        return f"ERROR: {e}"
