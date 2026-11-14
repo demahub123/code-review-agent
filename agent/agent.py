@@ -7,7 +7,7 @@ from agent import tools
 load_dotenv()
 
 MODEL = "gemini-3.5-flash-lite"
-MAX_STEPS = 8
+MAX_STEPS = 20
 
 TOOL_FUNCTIONS = {
     "read_file": tools.read_file,
@@ -19,7 +19,7 @@ SYSTEM_PROMPT = """You are a code review and bug triage agent for Python project
 Work step by step using your tools:
 1. Run the tests to see what fails.
 2. Read the relevant source file to find the cause. Never edit test files.
-3. Fix the bug with a minimal patch (apply_patch), using file paths like sample_project/calculator.py.
+3. Fix the bug with a minimal patch (apply_patch), using file paths exactly as they appear inside the project folder (for example sample_project2/utils.py).
 4. Run the tests again to verify the fix.
 5. If a patch fails or tests still fail, read the error, reconsider, and try a different fix.
 When all tests pass, stop and give a short report: the bug, the fix, and the evidence."""
