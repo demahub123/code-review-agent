@@ -2,4 +2,4 @@ google-genai
 python-dotenv
 pytest
 matplotlib
-
+streamlit

@@ -151,3 +151,20 @@ sample_project* projects with planted bugs
 ## AI assistance and attribution
 
 This project was developed with step-by-step guidance from an AI assistant (Claude), and the agent itself calls Google's Gemini API. Libraries used: google-genai, python-dotenv, pytest, matplotlib.
+
+
+## Local dashboard (Streamlit)
+
+After completing the setup above and activating the virtual environment, install the dashboard dependency:
+
+```powershell
+python -m pip install -r requirements.txt
+```
+
+Start the browser-based dashboard from the project root:
+
+```powershell
+python -m streamlit run streamlit_app.py
+```
+
+Streamlit will display a local address (usually `http://localhost:8501`) to open in your browser. The dashboard provides project selection, agent execution, saved memory, and evaluation results. The agent still edits files in the selected project folder, so back up important code and only run it on trusted projects.
