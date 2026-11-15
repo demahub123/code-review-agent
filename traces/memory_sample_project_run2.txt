@@ -1,0 +1,47 @@
+
+--- Step 1 ---
+ACT: run_tests({'project_dir': 'sample_project'})
+RESULT: .F                                                                       [100%]
+================================== FAILURES ===================================
+________________________________ test_average _________________________________
+test_calculator.py:9: in test_average
+    assert average([2,
+
+--- Step 2 ---
+ACT: search_memory({'query': 'average division integer float list sum'})
+RESULT: - Lesson from sample_project3 (fixed): symptom: monetary conversion yields off-by-one results due to float multiplication truncation | cause: direct casting of floating-point arithmetic to integers loses precision | fix: round the product before converting to integer
+- Lesson from sample_project3 (f
+
+--- Step 3 ---
+ACT: read_file({'path': 'sample_project/calculator.py'})
+RESULT: def add(a, b):
+    return a + b
+
+
+def average(numbers):
+    return sum(numbers) / (len(numbers) + 1)
+
+--- Step 4 ---
+ACT: apply_patch({'old_text': 'def average(numbers):\n    return sum(numbers) / (len(numbers) + 1)', 'new_text': 'def average(numbers):\n    return sum(numbers) / len(numbers)', 'path': 'sample_project/calculator.py'})
+RESULT: OK: patched sample_project/calculator.py
+
+--- Step 5 ---
+ACT: run_tests({'project_dir': 'sample_project'})
+RESULT: ..                                                                       [100%]
+2 passed in 0.03s
+
+
+--- Step 6 ---
+AGENT REPORT: ### Report
+
+1. **The Bug:**
+   - In `sample_project/calculator.py`, the `average(numbers)` function divided the sum of numbers by `len(numbers) + 1` instead of `len(numbers)`, resulting in incorrect average calculations.
+
+2. **The Fix:**
+   - Updated `average(numbers)` to divide `sum(numbers)` by `len(numbers)`.
+
+3. **Evidence:**
+   - Ran pytest on `sample_project` and all tests passed successfully (`2 passed`).
+
+Saved to memory: success=True, steps=6, patches=1
+LESSON: symptom: incorrect average calculation resulting in an unexpected value | cause: dividing the sum of numbers by an inflated count including an extra offset | fix: divide the sum of numbers strictly by the actual count of elements
