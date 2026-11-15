@@ -88,7 +88,7 @@ Four small projects with planted bugs, each with its own tests:
 |---|---|
 | `sample_project` | 1 (wrong average) |
 | `sample_project2` | 4 (wrong condition, off-by-one, empty input, string splitting) |
-| `sample_project3` | 6 chained bugs (float rounding, mutable default, discount maths, formatting) |
+| `sample_project3` | 4 defects causing 6 failing tests (float rounding, mutable default, discount maths, formatting); two tests fail only through dependency |
 | `sample_project4` | 4 trap bugs (round-half-up, 1-based pages, strict boolean parsing, ordered dedupe) |
 
 ## Evaluation
@@ -135,6 +135,8 @@ run_agent.py    run the agent on one project
 evaluate.py     evaluation harness
 analyze.py      tables and charts
 tests/          guardrail tests
+experiments/    early test scripts from development (kept as evidence)
+results.csv, summary.csv, traces/, charts/    evaluation data
 sample_project* projects with planted bugs
 ```
 
