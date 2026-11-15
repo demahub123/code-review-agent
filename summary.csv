@@ -1,0 +1,4 @@
+condition,runs,success_rate,steps_mean,steps_sd,patches_mean,tool_errors_mean
+baseline,12,1.0,7.83,2.41,2.83,0
+memory,12,1.0,7.5,1.24,1.42,0
+fault,12,1.0,7.5,1.45,1.58,1.08
