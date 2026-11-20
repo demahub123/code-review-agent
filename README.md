@@ -148,9 +148,9 @@ sample_project* projects with planted bugs
 - Memory is keyword-based and the lessons are written by the same model that uses them.
 - Python projects with pytest tests only.
 
-## AI assistance and attribution
+### Libraries and Technologies Used
 
-This project was developed with step-by-step guidance from an AI assistant (Claude), and the agent itself calls Google's Gemini API. Libraries used: google-genai, python-dotenv, pytest, matplotlib.
+This project uses Google Gemini API and the following Python libraries: google-genai, python-dotenv, pytest, and matplotlib.
 
 
 ## Local dashboard (Streamlit)
